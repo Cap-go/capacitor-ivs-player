@@ -5,7 +5,7 @@ import UIKit
 import AVKit
 import MediaPlayer
 
-func stateToStateName (_ state: IVSPlayer.State) -> String {
+func stateToStateName(_ state: IVSPlayer.State) -> String {
     switch state {
     case .idle:
         return "IDLE"
@@ -81,7 +81,7 @@ class TouchThroughView: IVSPlayerView {
  * here: https://capacitorjs.com/docs/plugins/ios
  */
 @objc(CapacitorIvsPlayerPlugin)
-public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDelegate, MPRemoteCommandCenterDelegate, CAPBridgedPlugin {
+public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDelegate, CAPBridgedPlugin {
     public let identifier = "CapacitorIvsPlayerPlugin"
     public let jsName = "CapacitorIvsPlayer"
     public let pluginMethods: [CAPPluginMethod] = [
