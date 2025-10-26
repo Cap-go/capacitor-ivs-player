@@ -1,6 +1,21 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [7.0.4](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.3...7.0.4) (2025-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.android.gms:play-services-cast-framework to v21.5.0 ([d912432](https://github.com/Cap-go/capacitor-ivs-player/commit/d912432110438ced2e9d2582ecd16c4ea3d509d7))
+
+## [7.0.3](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.2...7.0.3) (2025-10-26)
+
+
+### Bug Fixes
+
+* lint and build ([9a37d32](https://github.com/Cap-go/capacitor-ivs-player/commit/9a37d323f3ce50b5944342c9a1f54dd63707055b))
+* migrate to same name structure ([a4c549a](https://github.com/Cap-go/capacitor-ivs-player/commit/a4c549a6cb1b17b4cd35f20d75ec0f130f1419e2))
 
 ### [7.0.2](https://github.com/Cap-go/ivs-player/compare/7.0.1...7.0.2) (2025-07-19)
 
