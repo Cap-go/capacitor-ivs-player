@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.0.8](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.7...7.0.8) (2025-10-26)
+
+
+### Bug Fixes
+
+* prevent bump for app ([552731a](https://github.com/Cap-go/capacitor-ivs-player/commit/552731ad62c0d3442590a004923c97e3455be938))
+
 ## [7.0.7](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.6...7.0.7) (2025-10-26)
 
 ## [7.0.6](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.5...7.0.6) (2025-10-26)
