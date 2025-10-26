@@ -8,6 +8,10 @@
 
 [Ivs player](https://docs.aws.amazon.com/ivs/latest/userguide/player.html) for Capacitor app Android and IOS.
 
+## Documentation
+
+The most complete doc is available here: https://capgo.app/docs/plugins/ivs-player/
+
 ## Install
 
 ```bash
