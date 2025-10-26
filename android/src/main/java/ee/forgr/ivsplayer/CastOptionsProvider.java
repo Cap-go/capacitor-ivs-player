@@ -9,18 +9,16 @@ import java.util.List;
 
 public class CastOptionsProvider implements OptionsProvider {
 
-  @Override
-  public CastOptions getCastOptions(Context context) {
-    CastOptions castOptions = new CastOptions.Builder()
-      .setReceiverApplicationId(
-        CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
-      )
-      .build();
-    return castOptions;
-  }
+    @Override
+    public CastOptions getCastOptions(Context context) {
+        CastOptions castOptions = new CastOptions.Builder()
+            .setReceiverApplicationId(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+            .build();
+        return castOptions;
+    }
 
-  @Override
-  public List<SessionProvider> getAdditionalSessionProviders(Context context) {
-    return null;
-  }
+    @Override
+    public List<SessionProvider> getAdditionalSessionProviders(Context context) {
+        return null;
+    }
 }
