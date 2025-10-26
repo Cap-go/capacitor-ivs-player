@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.0.4](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.3...7.0.4) (2025-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.android.gms:play-services-cast-framework to v21.5.0 ([d912432](https://github.com/Cap-go/capacitor-ivs-player/commit/d912432110438ced2e9d2582ecd16c4ea3d509d7))
+
 ## [7.0.3](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.2...7.0.3) (2025-10-26)
 
 
