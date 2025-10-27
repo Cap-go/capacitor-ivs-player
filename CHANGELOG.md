@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.0.9](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.8...7.0.9) (2025-10-27)
+
+
+### Bug Fixes
+
+* build ([42e149a](https://github.com/Cap-go/capacitor-ivs-player/commit/42e149afbf90f34d1551595629b6e68acda37377))
+* git template ([0dc7f96](https://github.com/Cap-go/capacitor-ivs-player/commit/0dc7f96bbe36e6a215e9f9e5f8bc1707637fcf19))
+
 ## [7.0.8](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.7...7.0.8) (2025-10-26)
 
 
