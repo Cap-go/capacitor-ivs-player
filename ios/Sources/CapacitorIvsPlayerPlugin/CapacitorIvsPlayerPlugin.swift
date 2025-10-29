@@ -111,7 +111,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         CAPPluginMethod(name: "getCastStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
-    private let PLUGIN_VERSION = "0.13.34"
+    private let PLUGIN_VERSION: String = "7.0.12"
 
     let player = IVSPlayer()
     let playerDelegate = CapacitorIVSPlayer()

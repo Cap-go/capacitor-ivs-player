@@ -57,7 +57,7 @@ import org.json.JSONArray;
 @CapacitorPlugin(name = "CapacitorIvsPlayer")
 public class CapacitorIvsPlayerPlugin extends Plugin {
 
-    public final String PLUGIN_VERSION = "0.13.34";
+    public final String PLUGIN_VERSION = "7.0.12";
 
     private final int mainPiPFrameLayoutId = 257;
     private PlayerView playerView;
