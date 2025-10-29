@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.0.13](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.12...7.0.13) (2025-10-29)
+
 ## [7.0.12](https://github.com/Cap-go/capacitor-ivs-player/compare/7.0.11...7.0.12) (2025-10-29)
 
 
