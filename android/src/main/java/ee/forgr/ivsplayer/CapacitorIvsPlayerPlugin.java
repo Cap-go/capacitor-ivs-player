@@ -57,7 +57,7 @@ import org.json.JSONArray;
 @CapacitorPlugin(name = "CapacitorIvsPlayer")
 public class CapacitorIvsPlayerPlugin extends Plugin {
 
-    public final String PLUGIN_VERSION = "7.0.12";
+    public final String pluginVersion = "7.0.12";
 
     private final int mainPiPFrameLayoutId = 257;
     private PlayerView playerView;
@@ -395,7 +395,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     public void getPluginVersion(final PluginCall call) {
         try {
             final JSObject ret = new JSObject();
-            ret.put("version", this.PLUGIN_VERSION);
+            ret.put("version", this.pluginVersion);
             call.resolve(ret);
         } catch (final Exception e) {
             call.reject("Could not get plugin version", e);
