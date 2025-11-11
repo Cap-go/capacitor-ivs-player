@@ -434,7 +434,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                         // dialog.
                         mediaRouteButton.performClick();
                         Log.i("CapacitorIvsPlayer", "CreateCast performClick");
-                        // Check if a session is activ
+                        // Check if a session is active
                         call.resolve();
                     }
                 }

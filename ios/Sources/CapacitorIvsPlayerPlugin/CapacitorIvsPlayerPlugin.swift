@@ -181,7 +181,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.notifyListeners("onState", data: ["state": "PLAYING"])
         }
-        // send to listner
+        // send to listener
         isCastActive = true
         self.notifyListeners("onCastStatus", data: ["isActive": true])
     }
