@@ -280,17 +280,16 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
             );
             final FrameLayout finalMainPiPFrameLayout = mainPiPFrameLayout;
 
-            getActivity()
-                .runOnUiThread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            ((ViewGroup) getBridge().getWebView().getParent()).addView(finalMainPiPFrameLayout);
-                            finalMainPiPFrameLayout.addView(playerView);
-                            loadUrl(nextUrl);
-                        }
+            getActivity().runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        ((ViewGroup) getBridge().getWebView().getParent()).addView(finalMainPiPFrameLayout);
+                        finalMainPiPFrameLayout.addView(playerView);
+                        loadUrl(nextUrl);
                     }
-                );
+                }
+            );
         }
     }
 
@@ -409,36 +408,35 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         // open MediaRouteActionProvider
 
         var lastUrl = this.lastUrl;
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i("CapacitorIvsPlayer", "CreateCast");
-                        // Check if the CastContext is null
-                        if (castContext == null) {
-                            Log.i("CapacitorIvsPlayer", "CastContext is null");
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    Log.i("CapacitorIvsPlayer", "CreateCast");
+                    // Check if the CastContext is null
+                    if (castContext == null) {
+                        Log.i("CapacitorIvsPlayer", "CastContext is null");
+                    } else {
+                        // Check if there are any available devices
+                        if (castContext.getCastState() == CastState.NO_DEVICES_AVAILABLE) {
+                            Log.i("CapacitorIvsPlayer", "No devices available for casting");
                         } else {
-                            // Check if there are any available devices
-                            if (castContext.getCastState() == CastState.NO_DEVICES_AVAILABLE) {
-                                Log.i("CapacitorIvsPlayer", "No devices available for casting");
-                            } else {
-                                Log.i("CapacitorIvsPlayer", "Devices available for casting");
-                            }
+                            Log.i("CapacitorIvsPlayer", "Devices available for casting");
                         }
-                        mSessionManager.addSessionManagerListener(mSessionManagerListener, CastSession.class);
-                        if (mSessionManager.getCurrentCastSession() != null) {
-                            mCastSession = mSessionManager.getCurrentCastSession();
-                        }
-                        // Programmatically click the MediaRouteButton to show the device selection
-                        // dialog.
-                        mediaRouteButton.performClick();
-                        Log.i("CapacitorIvsPlayer", "CreateCast performClick");
-                        // Check if a session is active
-                        call.resolve();
                     }
+                    mSessionManager.addSessionManagerListener(mSessionManagerListener, CastSession.class);
+                    if (mSessionManager.getCurrentCastSession() != null) {
+                        mCastSession = mSessionManager.getCurrentCastSession();
+                    }
+                    // Programmatically click the MediaRouteButton to show the device selection
+                    // dialog.
+                    mediaRouteButton.performClick();
+                    Log.i("CapacitorIvsPlayer", "CreateCast performClick");
+                    // Check if a session is active
+                    call.resolve();
                 }
-            );
+            }
+        );
     }
 
     @PluginMethod
@@ -469,19 +467,18 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         this.title = call.getString("title", "");
         this.description = call.getString("description", "");
         this.cover = call.getString("cover", "");
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        cyclePlayer(prevUrl, url);
-                        _setFrame(x, y, width, height);
-                        playerView.setClipToOutline(false);
-                        _setPlayerPosition(toBack);
-                        setPip(call);
-                    }
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    cyclePlayer(prevUrl, url);
+                    _setFrame(x, y, width, height);
+                    playerView.setClipToOutline(false);
+                    _setPlayerPosition(toBack);
+                    setPip(call);
                 }
-            );
+            }
+        );
     }
 
     private void getDisplaySize() {
@@ -699,15 +696,14 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         playerView.getPlayer().pause();
         if (mainPiPFrameLayout != null) {
             // remove playerView from mainPiPFrameLayout
-            getActivity()
-                .runOnUiThread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            mainPiPFrameLayout.removeView(playerView);
-                        }
+            getActivity().runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        mainPiPFrameLayout.removeView(playerView);
                     }
-                );
+                }
+            );
         }
         call.resolve();
     }
@@ -934,29 +930,28 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
 
     public void _setPip(Boolean pip, Boolean foregroundApp) {
         Log.i("CapacitorIvsPlayer", "_setPip pip: " + pip);
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i("CapacitorIvsPlayer", "foregroundApp: " + foregroundApp + " pip: " + pip);
-                        isPip = pip;
-                        if (foregroundApp) {
-                            _setPlayerPosition(!pip);
-                            if (pip) {
-                                makeFloating();
-                            }
-                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            if (pip) {
-                                playerView.setClipToOutline(false);
-                                setDisplayPipButton(false);
-                                // Set player width to 100% of parent (Native PiP window)
-                                _setFrameMatchParent();
-                            }
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    Log.i("CapacitorIvsPlayer", "foregroundApp: " + foregroundApp + " pip: " + pip);
+                    isPip = pip;
+                    if (foregroundApp) {
+                        _setPlayerPosition(!pip);
+                        if (pip) {
+                            makeFloating();
+                        }
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (pip) {
+                            playerView.setClipToOutline(false);
+                            setDisplayPipButton(false);
+                            // Set player width to 100% of parent (Native PiP window)
+                            _setFrameMatchParent();
                         }
                     }
                 }
-            );
+            }
+        );
     }
 
     @PluginMethod
@@ -974,34 +969,32 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         if (isPip && !forceSetFrame) {
             return;
         }
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        playerViewParams = new FrameLayout.LayoutParams(width, height);
-                        playerViewParams.setMargins(x, y, 0, 0);
-                        playerView.setLayoutParams(playerViewParams);
-                    }
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    playerViewParams = new FrameLayout.LayoutParams(width, height);
+                    playerViewParams.setMargins(x, y, 0, 0);
+                    playerView.setLayoutParams(playerViewParams);
                 }
-            );
+            }
+        );
     }
 
     private void _setFrameMatchParent() {
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        playerViewParams = new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT
-                        );
-                        playerViewParams.setMargins(0, 0, 0, 0);
-                        playerView.setLayoutParams(playerViewParams);
-                    }
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    playerViewParams = new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    );
+                    playerViewParams.setMargins(0, 0, 0, 0);
+                    playerView.setLayoutParams(playerViewParams);
                 }
-            );
+            }
+        );
     }
 
     // function to get default height and width of the screen
@@ -1032,21 +1025,20 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     @PluginMethod
     public void setFrame(PluginCall call) {
         Log.i("CapacitorIvsPlayer", "setFrame");
-        getActivity()
-            .runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        getDisplaySize();
-                        var x = (int) convertDpToPixel(call.getFloat("x", 0.0f));
-                        var y = (int) convertDpToPixel(call.getFloat("y", 0.0f));
-                        var width = (int) convertDpToPixel(call.getFloat("width", convertPixelsToDp(size.x)));
-                        var height = (int) convertDpToPixel(call.getFloat("height", convertPixelsToDp(calcHeight(size.x))));
-                        _setFrame(x, y, width, height);
-                        call.resolve();
-                    }
+        getActivity().runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    getDisplaySize();
+                    var x = (int) convertDpToPixel(call.getFloat("x", 0.0f));
+                    var y = (int) convertDpToPixel(call.getFloat("y", 0.0f));
+                    var width = (int) convertDpToPixel(call.getFloat("width", convertPixelsToDp(size.x)));
+                    var height = (int) convertDpToPixel(call.getFloat("height", convertPixelsToDp(calcHeight(size.x))));
+                    _setFrame(x, y, width, height);
+                    call.resolve();
                 }
-            );
+            }
+        );
     }
 
     @PluginMethod
