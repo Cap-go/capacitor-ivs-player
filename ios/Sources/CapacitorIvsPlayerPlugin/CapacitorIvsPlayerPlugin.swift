@@ -175,7 +175,10 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         print("CapacitorIVSPlayer AirPlay is active")
         self.airplayButton.removeFromSuperview() // try to hide the airplay selector
         self.playerView.player?.pause()
-        createAvPlayer(url: self.player.path!)
+        guard let playerPath = self.player.path else {
+            return
+        }
+        createAvPlayer(url: playerPath)
         avPlayer?.play()
         // set PLAYING after 1 sec
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -202,10 +205,8 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
 
         // Remove the AVPlayerLayer
         if let sublayers = self.playerView.layer.sublayers {
-            for layer in sublayers {
-                if layer is AVPlayerLayer {
-                    layer.removeFromSuperlayer()
-                }
+            for layer in sublayers where layer is AVPlayerLayer {
+                layer.removeFromSuperlayer()
             }
         }
 
@@ -231,7 +232,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     @objc func handleAudioRouteChange(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-              let _ = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else {
+              AVAudioSession.RouteChangeReason(rawValue: reasonValue) != nil else {
             return
         }
         let session = AVAudioSession.sharedInstance()
@@ -284,7 +285,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     @available(iOS 15, *)
     private var pipController: AVPictureInPictureController? {
         get {
-            return _pipController as! AVPictureInPictureController?
+            return _pipController as? AVPictureInPictureController
         }
         set {
             _pipController = newValue
@@ -381,11 +382,9 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         var selectedQuality: IVSQuality?
 
         // find quality in list
-        for quality in self.player.qualities {
-            if quality.name == targetQualityName {
-                selectedQuality = quality
-                break
-            }
+        for quality in self.player.qualities where quality.name == targetQualityName {
+            selectedQuality = quality
+            break
         }
 
         // Check if we found quality
@@ -422,8 +421,8 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     @objc func setMute(_ call: CAPPluginCall) {
         print("CapacitorIVSPlayer setMute")
         DispatchQueue.main.async {
-            if self.isCastActive && (self.avPlayer != nil) {
-                self.avPlayer?.isMuted = call.getBool("mute", !self.avPlayer!.isMuted)
+            if self.isCastActive, let avPlayer = self.avPlayer {
+                self.avPlayer?.isMuted = call.getBool("mute", !avPlayer.isMuted)
             } else {
                 self.player.muted = call.getBool("mute", !self.player.muted)
             }
@@ -431,7 +430,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         call.resolve()
     }
 
-    @objc func _setPip(_ call: CAPPluginCall) -> Bool {
+    @objc func internalSetPip(_ call: CAPPluginCall) -> Bool {
         print("CapacitorIVSPlayer setPip")
         guard #available(iOS 15, *), let pipController = pipController else {
             return false
@@ -459,7 +458,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     }
 
     @objc func setPip(_ call: CAPPluginCall) {
-        if _setPip(call) {
+        if internalSetPip(call) {
             call.resolve()
         } else {
             call.reject("Not possible right now")
@@ -475,7 +474,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         call.resolve(["pip": pipController.isPictureInPictureActive])
     }
 
-    @objc func _setFrame(_ call: CAPPluginCall) -> Bool {
+    @objc func internalSetFrame(_ call: CAPPluginCall) -> Bool {
         guard let viewController = self.bridge?.viewController else {
             return false
         }
@@ -483,34 +482,34 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         let screenSize: CGRect = UIScreen.main.bounds
         let topPadding = viewController.view.safeAreaInsets.top
 
-        let x = Int(round(call.getFloat("x", Float(0))))
-        let y = Int(round(call.getFloat("y", Float(topPadding))))
+        let xFrame = Int(round(call.getFloat("x", Float(0))))
+        let yFrame = Int(round(call.getFloat("y", Float(topPadding))))
         let width = Int(round(call.getFloat("width", Float(screenSize.width))))
         let height = Int(round(call.getFloat("height", Float(screenSize.width * (9.0 / 16.0)))))
         self.playerView.playerLayer.zPosition = -1
         self.playerView.frame = CGRect(
-            x: x,
-            y: y,
+            x: xFrame,
+            y: yFrame,
             width: width,
             height: height
         )
-        print("CapacitorIVSPlayer _setFrame x:\(x) y:\(y) width:\(width) height:\(height) done")
+        print("CapacitorIVSPlayer _setFrame x:\(xFrame) y:\(yFrame) width:\(width) height:\(height) done")
         return true
     }
 
     @objc func setFrame(_ call: CAPPluginCall) {
         print("CapacitorIVSPlayer setFrame x y")
         DispatchQueue.main.async {
-            if self._setFrame(call) {
+            if self.internalSetFrame(call) {
                 call.resolve()
             } else {
-                call.reject("Unable to _setFrame")
+                call.reject("Unable to internalSetFrame")
             }
         }
         call.resolve()
     }
 
-    @objc func _setPlayerPosition(toBack: Bool) -> Bool {
+    @objc func internalSetPlayerPosition(toBack: Bool) -> Bool {
         self.toBack = toBack
         if toBack {
             self.webView?.backgroundColor = UIColor.clear
@@ -531,10 +530,10 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         print("CapacitorIVSPlayer setPlayerPosition")
         let toBack = call.getBool("toBack", false)
         DispatchQueue.main.async {
-            if self._setPlayerPosition(toBack: toBack) {
+            if self.internalSetPlayerPosition(toBack: toBack) {
                 call.resolve()
             } else {
-                call.reject("Unable to _setPlayerPosition")
+                call.reject("Unable to internalSetPlayerPosition")
             }
         }
     }
@@ -543,7 +542,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         call.resolve(["toBack": self.toBack])
     }
 
-    @objc func _setBackgroundState(backgroundState: String) -> Bool {
+    @objc func internalSetBackgroundState(backgroundState: String) -> Bool {
         if ["PAUSED", "PLAYING"].contains(backgroundState) {
             self.backgroundState = backgroundState
         } else {
@@ -557,7 +556,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         print("CapacitorIVSPlayer setBackgroundState")
         let backgroundState = call.getString("backgroundState", "PAUSED")
         DispatchQueue.main.async {
-            if self._setBackgroundState(backgroundState: backgroundState) {
+            if self.internalSetBackgroundState(backgroundState: backgroundState) {
                 call.resolve()
             } else {
                 call.reject("Invalid backgroundState: \(backgroundState)")
@@ -570,10 +569,10 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     }
 
     public func loadUrl(url: String) {
-        let u = URL(string: url)
-        self.player.load(u)
+        let urlObject = URL(string: url)
+        self.player.load(urlObject)
         if self.isCastActive {
-            self.createAvPlayer(url: u)
+            self.createAvPlayer(url: urlObject)
             self.avPlayer?.play()
         }
         print("CapacitorIVSPlayer loadUrl")
@@ -599,7 +598,11 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             if self.avPlayer != nil {
                 self.avPlayer?.replaceCurrentItem(with: nil)
             }
-            self.avPlayer = AVPlayer(url: self.player.path!)
+            guard let playerPath = self.player.path else {
+                call.reject("No player path available")
+                return
+            }
+            self.avPlayer = AVPlayer(url: playerPath)
 
             // Add a AVRoutePickerView to show airplay dialog. You can create this button and add it to your desired place in UI
             self.airplayButton = AVRoutePickerView(frame: CGRect(x: 0, y: 0, width: 30.0, height: 30.0))
@@ -636,15 +639,15 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             self.setupRemoteTransportControls()
             let setupDone = self.cyclePlayer(prevUrl: self.player.path?.absoluteString ?? "", nextUrl: url)
             print("CapacitorIVSPlayer setupDone \(setupDone)")
-            self._setPip(call)
-            let FrameDone = self._setFrame(call)
-            let PlayerPositionDone = self._setPlayerPosition(toBack: self.toBack)
-            if setupDone && FrameDone && PlayerPositionDone {
+            self.internalSetPip(call)
+            let frameDone = self.internalSetFrame(call)
+            let playerPositionDone = self.internalSetPlayerPosition(toBack: self.toBack)
+            if setupDone && frameDone && playerPositionDone {
                 self.isClosed = false
                 print("CapacitorIVSPlayer success create")
                 call.resolve()
             } else {
-                call.reject("Unable to cyclePlayer \(setupDone) or _setFrame \(FrameDone) or _setPlayerPosition \(PlayerPositionDone)")
+                call.reject("Unable to cyclePlayer \(setupDone) or internalSetFrame \(frameDone) or internalSetPlayerPosition \(playerPositionDone)")
             }
         }
     }
