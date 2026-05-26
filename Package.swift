@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "CapgoIvsPlayer",
+    name: "CapgoCapacitorIvsPlayer",
     platforms: [.iOS(.v15)],
     products: [
         .library(
-            name: "CapgoIvsPlayer",
+            name: "CapgoCapacitorIvsPlayer",
             targets: ["CapacitorIvsPlayerPlugin"])
     ],
     dependencies: [
