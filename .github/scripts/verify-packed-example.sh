@@ -38,15 +38,21 @@ bun remove "$plugin_name"
 bun add "${packed_packages[0]}"
 bun run build
 
+prepare_platform() {
+  local platform_name="$1"
+  rm -rf "$platform_name"
+  bunx cap add "$platform_name"
+}
+
 case "$platform" in
   android)
-    bunx cap add android
+    prepare_platform android
     bunx cap sync android
     cd android
     ./gradlew build test
     ;;
   ios)
-    bunx cap add ios
+    prepare_platform ios
     bunx cap sync ios
     xcodebuild -project ios/App/App.xcodeproj -scheme App -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO
     ;;

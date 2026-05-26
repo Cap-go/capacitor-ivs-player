@@ -1,6 +1,6 @@
 // import { Camera } from '@capacitor/camera';
 import { SplashScreen } from "@capacitor/splash-screen";
-import { CapacitorIvsPlayer } from "@capgo/ivs-player";
+import { CapacitorIvsPlayer } from "@capgo/capacitor-ivs-player";
 
 window.customElements.define(
   "capacitor-welcome",
