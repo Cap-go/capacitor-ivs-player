@@ -1,10 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-<!--    // merge config for pip supportsPictureInPicture -->
-<!--    <application android:supportsPictureInPicture="true" />-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- merge config for pip supportsPictureInPicture -->
+    <!-- <application android:supportsPictureInPicture="true" /> -->
     <application>
-            <meta-data
-            android:name=
-                "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-            android:value="ee.forgr.ivsplayer.CastOptionsProvider" />
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="ee.forgr.ivsplayer.CastOptionsProvider"
+            tools:replace="android:value" />
     </application>
 </manifest>
