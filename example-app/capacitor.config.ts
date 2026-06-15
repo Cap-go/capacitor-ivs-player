@@ -9,6 +9,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     SplashScreen: {
+      launchAutoHide: false,
       launchShowDuration: 0,
     },
     CapacitorUpdater: {
@@ -16,7 +17,6 @@ const config: CapacitorConfig = {
       autoUpdate: true,
       autoSplashscreen: true,
       directUpdate: 'always',
-      defaultChannel: 'production',
       version: pkg.version,
     },
   },
