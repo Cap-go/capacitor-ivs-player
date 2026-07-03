@@ -4,7 +4,7 @@ import pkg from './package.json';
 
 const config: CapacitorConfig = {
   appId: 'app.capgo.ivs.player.example',
-  appName: 'IVS Player Example',
+  appName: '@capgo/capacitor-ivs-player',
   bundledWebRuntime: false,
   webDir: 'dist',
   plugins: {
