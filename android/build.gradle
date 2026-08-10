@@ -52,7 +52,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
     implementation 'com.google.android.material:material:1.14.0'
-    implementation 'com.amazonaws:ivs-player:1.53.0'
+    implementation 'com.amazonaws:ivs-player:1.55.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation 'androidx.mediarouter:mediarouter:1.2.5'
