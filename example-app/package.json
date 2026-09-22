@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
-    "@capacitor/camera": "^8.0.0",
+    "@capacitor/camera": "^5.0.2",
     "@capacitor/splash-screen": "^8.0.0",
     "@capgo/capacitor-ivs-player": "file:..",
     "@capacitor/ios": "^8.0.0",
