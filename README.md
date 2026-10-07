@@ -1,12 +1,28 @@
 # @capgo/capacitor-ivs-player
-<a href="https://capgo.app/"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-ivs-player" alt="Capgo - Instant updates for Capacitor" /></a>
+
+Play Amazon IVS live streams in your Capacitor app with the native IVS player on iOS and Android, including picture in picture and playback events.
+
+<a href="https://capgo.app/?ref=plugin_ivs_player"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-ivs-player" alt="Capgo - Instant updates for Capacitor" /></a>
 
 <div align="center">
-  <h2><a href="https://capgo.app/?ref=plugin_ivs_player"> ➡️ Get Instant updates for your App with Capgo</a></h2>
-  <h2><a href="https://capgo.app/consulting/?ref=plugin_ivs_player"> Missing a feature? We’ll build the plugin for you 💪</a></h2>
+  <p><b>Capgo</b>: open-source live updates for Ionic and Capacitor apps. Ship OTA fixes and features instantly, without waiting for app store review.</p>
+  <h2><a href="https://capgo.app/register/?ref=plugin_ivs_player">➡️ Get started for free</a></h2>
+  <p>14-day unlimited free trial. No credit card required</p>
+  <p><a href="https://capgo.app/consulting/?ref=plugin_ivs_player">Missing a feature? We'll build the plugin for you 💪</a></p>
 </div>
 
-[Ivs player](https://docs.aws.amazon.com/ivs/latest/userguide/player.html) for Capacitor app Android and IOS.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Cap-go/capacitor-ivs-player/main/assets/github-social-preview.png" alt="@capgo/capacitor-ivs-player for Capacitor apps" width="300" />
+</p>
+
+## Key features
+
+- **Player**: `create()` with a stream URL, then `start()`, `pause()` and `delete()`.
+- **Layout**: `setFrame()` and `setPlayerPosition()` place the native player in front of or behind your web UI.
+- **Picture in picture**: `setPip()` with `startPip`, `stopPip` and `closePip` events.
+- **Quality**: `setAutoQuality()` and quality change events.
+- **Playback events**: state, duration, cues, rebuffering, seek and error listeners.
+- **Platforms**: iOS and Android. Uses the Amazon IVS player SDKs. Not available on web.
 
 ## Documentation
 
