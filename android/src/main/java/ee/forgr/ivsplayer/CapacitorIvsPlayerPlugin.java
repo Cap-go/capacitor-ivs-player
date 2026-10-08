@@ -151,98 +151,94 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     }
 
     private void addPipListener() {
-        getBridge()
-            .getActivity()
-            .addOnPictureInPictureModeChangedListener(
-                new Consumer<PictureInPictureModeChangedInfo>() {
-                    @Override
-                    public void accept(PictureInPictureModeChangedInfo pictureInPictureModeChangedInfo) {
-                        getBridge().getActivity().getLifecycle().getCurrentState();
-                        final JSObject ret = new JSObject();
-                        if (getBridge().getActivity().getLifecycle().getCurrentState() == Lifecycle.State.CREATED) {
-                            closePip();
-                        } else if (getBridge().getActivity().getLifecycle().getCurrentState() == Lifecycle.State.STARTED) {
-                            togglePip(!pictureInPictureModeChangedInfo.isInPictureInPictureMode());
-                        }
+        getBridge().getActivity().addOnPictureInPictureModeChangedListener(
+            new Consumer<PictureInPictureModeChangedInfo>() {
+                @Override
+                public void accept(PictureInPictureModeChangedInfo pictureInPictureModeChangedInfo) {
+                    getBridge().getActivity().getLifecycle().getCurrentState();
+                    final JSObject ret = new JSObject();
+                    if (getBridge().getActivity().getLifecycle().getCurrentState() == Lifecycle.State.CREATED) {
+                        closePip();
+                    } else if (getBridge().getActivity().getLifecycle().getCurrentState() == Lifecycle.State.STARTED) {
+                        togglePip(!pictureInPictureModeChangedInfo.isInPictureInPictureMode());
                     }
                 }
-            );
+            }
+        );
     }
 
     private void addPlayerListener() {
         // listen on player event
-        playerView
-            .getPlayer()
-            .addListener(
-                new Player.Listener() {
-                    @Override
-                    public void onStateChanged(Player.State state) {
-                        if (isCast) {
-                            return;
-                        }
-                        final JSObject ret = new JSObject();
-                        ret.put("state", state);
-                        Log.i("CapacitorIvsPlayer", "onStateChanged: " + state);
-                        if (state == Player.State.READY && autoPlay) {
-                            playerView.getPlayer().play();
-                        }
-                        if (state == Player.State.PLAYING && playerView.getParent() == null) {
-                            FrameLayout mainPiPFrameLayout = getBridge().getActivity().findViewById(mainPiPFrameLayoutId);
-                            mainPiPFrameLayout.addView(playerView);
-                        }
-                        notifyListeners("onState", ret);
+        playerView.getPlayer().addListener(
+            new Player.Listener() {
+                @Override
+                public void onStateChanged(Player.State state) {
+                    if (isCast) {
+                        return;
                     }
-
-                    @Override
-                    public void onCue(Cue cue) {
-                        final JSObject ret = new JSObject();
-                        ret.put("cue", cue);
-                        notifyListeners("onCue", ret);
+                    final JSObject ret = new JSObject();
+                    ret.put("state", state);
+                    Log.i("CapacitorIvsPlayer", "onStateChanged: " + state);
+                    if (state == Player.State.READY && autoPlay) {
+                        playerView.getPlayer().play();
                     }
-
-                    @Override
-                    public void onDurationChanged(long duration) {
-                        final JSObject ret = new JSObject();
-                        ret.put("duration", duration);
-                        notifyListeners("onDuration", ret);
+                    if (state == Player.State.PLAYING && playerView.getParent() == null) {
+                        FrameLayout mainPiPFrameLayout = getBridge().getActivity().findViewById(mainPiPFrameLayoutId);
+                        mainPiPFrameLayout.addView(playerView);
                     }
-
-                    @Override
-                    public void onError(PlayerException error) {
-                        final JSObject ret = new JSObject();
-                        ret.put("error", error);
-                        notifyListeners("onError", ret);
-                    }
-
-                    @Override
-                    public void onRebuffering() {
-                        final JSObject ret = new JSObject();
-                        notifyListeners("onRebuffering", ret);
-                    }
-
-                    @Override
-                    public void onSeekCompleted(long var1) {
-                        final JSObject ret = new JSObject();
-                        ret.put("position", var1);
-                        notifyListeners("onSeekCompleted", ret);
-                    }
-
-                    @Override
-                    public void onVideoSizeChanged(int var1, int var2) {
-                        final JSObject ret = new JSObject();
-                        ret.put("width", var1);
-                        ret.put("height", var2);
-                        notifyListeners("onVideoSize", ret);
-                    }
-
-                    @Override
-                    public void onQualityChanged(@NonNull Quality var1) {
-                        final JSObject ret = new JSObject();
-                        ret.put("quality", var1);
-                        notifyListeners("onQuality", ret);
-                    }
+                    notifyListeners("onState", ret);
                 }
-            );
+
+                @Override
+                public void onCue(Cue cue) {
+                    final JSObject ret = new JSObject();
+                    ret.put("cue", cue);
+                    notifyListeners("onCue", ret);
+                }
+
+                @Override
+                public void onDurationChanged(long duration) {
+                    final JSObject ret = new JSObject();
+                    ret.put("duration", duration);
+                    notifyListeners("onDuration", ret);
+                }
+
+                @Override
+                public void onError(PlayerException error) {
+                    final JSObject ret = new JSObject();
+                    ret.put("error", error);
+                    notifyListeners("onError", ret);
+                }
+
+                @Override
+                public void onRebuffering() {
+                    final JSObject ret = new JSObject();
+                    notifyListeners("onRebuffering", ret);
+                }
+
+                @Override
+                public void onSeekCompleted(long var1) {
+                    final JSObject ret = new JSObject();
+                    ret.put("position", var1);
+                    notifyListeners("onSeekCompleted", ret);
+                }
+
+                @Override
+                public void onVideoSizeChanged(int var1, int var2) {
+                    final JSObject ret = new JSObject();
+                    ret.put("width", var1);
+                    ret.put("height", var2);
+                    notifyListeners("onVideoSize", ret);
+                }
+
+                @Override
+                public void onQualityChanged(@NonNull Quality var1) {
+                    final JSObject ret = new JSObject();
+                    ret.put("quality", var1);
+                    notifyListeners("onQuality", ret);
+                }
+            }
+        );
     }
 
     public void loadUrl(String url) {
@@ -319,21 +315,18 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                     .build();
 
                 // Load the media.
-                session
-                    .getRemoteMediaClient()
-                    .load(mediaInfo, mediaLoadOptions)
-                    .setResultCallback(
-                        new ResultCallback<RemoteMediaClient.MediaChannelResult>() {
-                            @Override
-                            public void onResult(RemoteMediaClient.MediaChannelResult result) {
-                                if (result.getStatus().isSuccess()) {
-                                    Log.d("CapacitorIvsPlayer", "Media loaded successfully");
-                                } else {
-                                    Log.e("CapacitorIvsPlayer", "Error loading media: " + result.getStatus().getStatusCode());
-                                }
+                session.getRemoteMediaClient().load(mediaInfo, mediaLoadOptions).setResultCallback(
+                    new ResultCallback<RemoteMediaClient.MediaChannelResult>() {
+                        @Override
+                        public void onResult(RemoteMediaClient.MediaChannelResult result) {
+                            if (result.getStatus().isSuccess()) {
+                                Log.d("CapacitorIvsPlayer", "Media loaded successfully");
+                            } else {
+                                Log.e("CapacitorIvsPlayer", "Error loading media: " + result.getStatus().getStatusCode());
                             }
                         }
-                    );
+                    }
+                );
                 playerView.getPlayer().pause();
                 isCast = true;
                 final JSObject ret = new JSObject();
@@ -1009,7 +1002,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
      *         density
      */
     public float convertDpToPixel(float dp) {
-        return (dp * ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+        return dp * ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     /**
@@ -1019,7 +1012,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
      * @return A float value to represent dp equivalent to px value
      */
     public float convertPixelsToDp(float px) {
-        return (px / ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px / ((float) getContext().getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     @PluginMethod
