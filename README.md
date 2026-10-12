@@ -2,7 +2,7 @@
 
 Play Amazon IVS live streams in your Capacitor app with the native IVS player on iOS and Android, including picture in picture and playback events.
 
-<a href="https://capgo.app/?ref=plugin_ivs_player"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-ivs-player" alt="Capgo - Instant updates for Capacitor" /></a>
+<a href="https://capgo.app/?ref=plugin_ivs_player"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-ivs-player" alt="Capgo - Build Capacitor apps with AI, ship updates instantly" /></a>
 
 <div align="center">
   <p><b>Capgo</b>: push fixes to your Capacitor users in minutes, build signed iOS and Android apps without a Mac, and roll back in one click.</p>
@@ -10,6 +10,8 @@ Play Amazon IVS live streams in your Capacitor app with the native IVS player on
   <p>14-day unlimited free trial. No credit card required</p>
   <p><a href="https://capgo.app/consulting/?ref=plugin_ivs_player">Missing a feature? We'll build the plugin for you 💪</a></p>
 </div>
+
+> 🤖 **Building with an AI coding agent?** Install [Capgo skills](https://capgo.app/skills/?ref=plugin_ivs_player) so Claude Code, Codex, Cursor, Copilot, or Gemini CLI know how to install and use `@capgo/capacitor-ivs-player` in your Capacitor app: `npx skills add Cap-go/capgo-skills`. Then ask your agent: *"Add @capgo/capacitor-ivs-player to my Capacitor app and wire it up."* [Agent setup guides](https://capgo.app/agents/?ref=plugin_ivs_player) · [Hosted MCP](https://capgo.app/docs/ai/mcp/?ref=plugin_ivs_player)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Cap-go/capacitor-ivs-player/main/assets/github-social-preview.png" alt="@capgo/capacitor-ivs-player for Capacitor apps" width="300" />
