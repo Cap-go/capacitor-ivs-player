@@ -2,7 +2,30 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { Capacitor } from '@capacitor/core';
 // import { Camera } from '@capacitor/camera';
 import { SplashScreen } from '@capacitor/splash-screen';
-import { CapacitorIvsPlayer } from '@capgo/capacitor-ivs-player';
+import { CapacitorIvsPlayer, pause, resume } from '@capgo/capacitor-ivs-player';
+
+const SAMPLE_STREAM_URL =
+  'https://d6hwdeiig07o4.cloudfront.net/ivs/956482054022/cTo5UpKS07do/2020-07-13T22-54-42.188Z/OgRXMLtq8M11/media/hls/master.m3u8';
+const ENGINE_OVERLAY_ID = 'engine-demo-overlay';
+
+function setEngineStatus(text) {
+  const node = document.getElementById('engine-status');
+  if (node) {
+    node.textContent = text;
+  }
+}
+
+async function reportPluginState(label) {
+  try {
+    const state = await CapacitorIvsPlayer.getState();
+    setEngineStatus(`${label}:state=${state.state}`);
+    return state;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    setEngineStatus(`${label}:error=${message}`);
+    throw error;
+  }
+}
 
 window.customElements.define(
   'capacitor-welcome',
@@ -114,6 +137,21 @@ window.customElements.define(
         <p>
           <button class="button" id="toggle-pip">Toggle Pip</button>
         </p>
+        <h2>Native UI Engine</h2>
+        <p>
+          <button class="button" data-testid="create-engine-off" id="create-engine-off">Create (engine off)</button>
+        </p>
+        <p>
+          <button class="button" data-testid="create-engine-on" id="create-engine-on">Create (engine on)</button>
+        </p>
+        <p>
+          <button class="button" data-testid="create-engine-invalid" id="create-engine-invalid">
+            Create (engine on, missing selector)
+          </button>
+        </p>
+        <p>
+          <button class="button" data-testid="toggle-web-overlay" id="toggle-web-overlay">Toggle web overlay</button>
+        </p>
         <p>
           <img id="image" style="max-width: 100%">
         </p>
@@ -140,9 +178,8 @@ window.customElements.define(
       self.shadowRoot
         .querySelector('#autostart-stream')
         .addEventListener('click', async function (e) {
-          const url =
-            'https://d6hwdeiig07o4.cloudfront.net/ivs/956482054022/cTo5UpKS07do/2020-07-13T22-54-42.188Z/OgRXMLtq8M11/media/hls/master.m3u8';
-          CapacitorIvsPlayer.create({ url, autoPlay: true, toBack: true });
+          await CapacitorIvsPlayer.create({ url: SAMPLE_STREAM_URL, autoPlay: true, toBack: true });
+          await reportPluginState('autostart');
         });
       self.shadowRoot.querySelector('#start-stream').addEventListener('click', async function (e) {
         CapacitorIvsPlayer.start();
@@ -151,9 +188,59 @@ window.customElements.define(
         CapacitorIvsPlayer.pause();
       });
       self.shadowRoot.querySelector('#create-stream').addEventListener('click', async function (e) {
-        const url =
-          'https://d6hwdeiig07o4.cloudfront.net/ivs/956482054022/cTo5UpKS07do/2020-07-13T22-54-42.188Z/OgRXMLtq8M11/media/hls/master.m3u8';
-        CapacitorIvsPlayer.create({ url, autoPlay: false, toBack: true });
+        await CapacitorIvsPlayer.create({ url: SAMPLE_STREAM_URL, autoPlay: false, toBack: true });
+        await reportPluginState('create-off');
+      });
+      self.shadowRoot.querySelector('#create-engine-off').addEventListener('click', async function () {
+        await CapacitorIvsPlayer.create({ url: SAMPLE_STREAM_URL, autoPlay: false, toBack: true, nativeUiEngine: false });
+        await reportPluginState('engine-off');
+      });
+      self.shadowRoot.querySelector('#create-engine-on').addEventListener('click', async function () {
+        await CapacitorIvsPlayer.create({
+          url: SAMPLE_STREAM_URL,
+          autoPlay: true,
+          toBack: true,
+          nativeUiEngine: true,
+          projectionSelector: '#ivs-player-slot',
+        });
+        await reportPluginState('engine-on');
+      });
+      self.shadowRoot.querySelector('#create-engine-invalid').addEventListener('click', async function () {
+        try {
+          await CapacitorIvsPlayer.create({
+            url: SAMPLE_STREAM_URL,
+            autoPlay: false,
+            toBack: true,
+            nativeUiEngine: true,
+          });
+          setEngineStatus('invalid:unexpected-success');
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          setEngineStatus(`invalid:rejected=${message}`);
+        }
+      });
+      self.shadowRoot.querySelector('#toggle-web-overlay').addEventListener('click', async function () {
+        const existing = document.getElementById(ENGINE_OVERLAY_ID);
+        if (existing) {
+          existing.remove();
+          resume();
+          await reportPluginState('overlay-dismissed');
+          return;
+        }
+        pause();
+        const overlay = document.createElement('div');
+        overlay.id = ENGINE_OVERLAY_ID;
+        overlay.setAttribute('data-testid', 'engine-web-overlay');
+        overlay.style.cssText =
+          'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;color:#fff;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:1.2rem;';
+        overlay.textContent = 'Web overlay (tap to dismiss)';
+        overlay.addEventListener('click', async () => {
+          overlay.remove();
+          resume();
+          await reportPluginState('overlay-dismissed');
+        });
+        document.body.appendChild(overlay);
+        await reportPluginState('overlay-open');
       });
       self.shadowRoot.querySelector('#delete-stream').addEventListener('click', async function (e) {
         CapacitorIvsPlayer.delete();

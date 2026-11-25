@@ -1,0 +1,8 @@
+appId: com.example.plugin
+---
+- launchApp
+- tapOn: 'Create (engine on, missing selector)'
+- assertVisible:
+    id: 'engine-status'
+- assertVisible:
+    text: 'invalid:rejected='

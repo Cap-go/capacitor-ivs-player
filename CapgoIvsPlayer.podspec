@@ -14,5 +14,6 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
   s.dependency 'Capacitor'
   s.dependency 'AmazonIVSPlayer'
+  s.dependency 'WebViewNativeUIEngine', '1.0.11'
   s.swift_version = '5.1'
 end

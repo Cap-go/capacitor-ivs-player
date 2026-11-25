@@ -4,6 +4,7 @@ import AmazonIVSPlayer
 import UIKit
 import AVKit
 import MediaPlayer
+import WebViewNativeUIEngine
 
 func stateToStateName(_ state: IVSPlayer.State) -> String {
     switch state {
@@ -111,7 +112,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         CAPPluginMethod(name: "getCastStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
-    private let pluginVersion: String = "8.0.47"
+    private let pluginVersion: String = "8.0.48"
 
     let player = IVSPlayer()
     let playerDelegate = CapacitorIVSPlayer()
@@ -128,6 +129,57 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     var isCastActive: Bool = false
     var avPlayer: AVPlayer?
     var backgroundState: String = "PAUSED"
+    private var projection: NativeUIProjection?
+    private var nativeUiEngineEnabled = false
+
+    deinit {
+        projection?.destroy()
+    }
+
+    private func teardownNativeUiEngine() {
+        projection?.destroy()
+        projection = nil
+        nativeUiEngineEnabled = false
+    }
+
+    private func setupNativeUiEngine(projectionSelector: String) -> Bool {
+        teardownNativeUiEngine()
+        do {
+            projection = try NativeUIProjection(
+                webView: bridge?.webView,
+                plugin: jsName,
+                projectionSelector: projectionSelector,
+                receiveListeners: .init(
+                    update: ["playerProjectionUpdated"],
+                    projection: .init(
+                        native: ["playerProjectionShown"],
+                        web: [],
+                        none: ["playerProjectionHidden"]
+                    )
+                ),
+                view: { [weak self] in self?.playerView }
+            )
+            nativeUiEngineEnabled = true
+            return true
+        } catch {
+            CAPLog.print("CapacitorIVSPlayer Native UI projection unavailable: \(error)")
+            return false
+        }
+    }
+
+    private func notifyPlayerProjectionUpdated() {
+        guard nativeUiEngineEnabled else {
+            return
+        }
+        notifyListeners("playerProjectionUpdated", data: [:])
+    }
+
+    public override func notifyListeners(_ eventName: String, data: [String: Any]?, retainUntilConsumed: Bool = false) {
+        if nativeUiEngineEnabled {
+            projection?.receive(eventName, data: data)
+        }
+        super.notifyListeners(eventName, data: data, retainUntilConsumed: retainUntilConsumed)
+    }
 
     override public func load() {
         self.webView?.backgroundColor = UIColor.black
@@ -494,6 +546,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             height: height
         )
         print("CapacitorIVSPlayer _setFrame x:\(xFrame) y:\(yFrame) width:\(width) height:\(height) done")
+        notifyPlayerProjectionUpdated()
         return true
     }
 
@@ -631,6 +684,18 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         let url = call.getString("url", "")
         autoPlay = call.getBool("autoPlay", false)
         toBack = call.getBool("toBack", false)
+        let enableEngine = call.getBool("nativeUiEngine", false)
+        if !enableEngine {
+            teardownNativeUiEngine()
+        } else if let selector = call.getString("projectionSelector"), !selector.isEmpty {
+            if !setupNativeUiEngine(projectionSelector: selector) {
+                call.reject("Native UI projection unavailable")
+                return
+            }
+        } else {
+            call.reject("projectionSelector is required when nativeUiEngine is true")
+            return
+        }
         DispatchQueue.main.async {
             let title = call.getString("title", "")
             let subTitle = call.getString("subtitle", "")
@@ -644,6 +709,9 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             let playerPositionDone = self.internalSetPlayerPosition(toBack: self.toBack)
             if setupDone && frameDone && playerPositionDone {
                 self.isClosed = false
+                if self.nativeUiEngineEnabled {
+                    self.notifyListeners("playerProjectionShown", data: [:])
+                }
                 print("CapacitorIVSPlayer success create")
                 call.resolve()
             } else {
@@ -743,6 +811,10 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
                 self.player.pause()
                 self.player.load(nil)
             }
+            if self.nativeUiEngineEnabled {
+                self.notifyListeners("playerProjectionHidden", data: [:])
+            }
+            self.teardownNativeUiEngine()
         }
         call.resolve()
     }

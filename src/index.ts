@@ -7,4 +7,5 @@ const CapacitorIvsPlayer = registerPlugin<CapacitorIvsPlayerPlugin>('CapacitorIv
 });
 
 export * from './definitions';
+export { pause, resume } from '@webview-native-ui/engine';
 export { CapacitorIvsPlayer };
