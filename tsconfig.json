@@ -17,5 +17,5 @@
     "strict": true,
     "target": "es2017"
   },
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts", "src/create-options.ts"]
 }

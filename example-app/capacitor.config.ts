@@ -19,6 +19,9 @@ const config: CapacitorConfig = {
       directUpdate: 'always',
       version: pkg.version,
     },
+    CapacitorIvsPlayer: {
+      nativeUiEngine: true,
+    },
   },
   server: {
     cleartext: true,

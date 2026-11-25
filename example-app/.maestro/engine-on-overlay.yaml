@@ -1,0 +1,37 @@
+appId: com.example.plugin
+---
+- launchApp
+- scrollUntilVisible:
+    text: 'Create (engine on)'
+    direction: DOWN
+- tapOn: 'Create (engine on)'
+- scrollUntilVisible:
+    id: 'engine-status'
+    direction: UP
+- extendedWaitUntil:
+    visible:
+      text: 'engine-on:state=PLAYING;projection=visible'
+    timeout: 90000
+- assertVisible:
+    id: 'ivs-player-slot'
+- scrollUntilVisible:
+    text: 'Toggle web overlay'
+    direction: DOWN
+- tapOn: 'Toggle web overlay'
+- scrollUntilVisible:
+    id: 'engine-status'
+    direction: UP
+- extendedWaitUntil:
+    visible:
+      text: 'overlay-open:state=PLAYING;projection=visible'
+    timeout: 90000
+- assertVisible:
+    id: 'engine-demo-overlay'
+- tapOn: 'Web overlay (tap to dismiss)'
+- scrollUntilVisible:
+    id: 'engine-status'
+    direction: UP
+- extendedWaitUntil:
+    visible:
+      text: 'overlay-dismissed:state=PLAYING;projection=visible'
+    timeout: 90000

@@ -1,0 +1,16 @@
+appId: com.example.plugin
+---
+- launchApp
+- scrollUntilVisible:
+    text: 'Create (engine off)'
+    direction: DOWN
+- tapOn: 'Create (engine off)'
+- scrollUntilVisible:
+    id: 'engine-status'
+    direction: UP
+- assertVisible:
+    id: 'engine-status'
+- extendedWaitUntil:
+    visible:
+      text: 'engine-off:state=PLAYING'
+    timeout: 90000

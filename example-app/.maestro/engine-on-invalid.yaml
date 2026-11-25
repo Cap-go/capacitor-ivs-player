@@ -1,0 +1,14 @@
+appId: com.example.plugin
+---
+- launchApp
+- scrollUntilVisible:
+    text: 'Create (engine on, missing selector)'
+    direction: DOWN
+- tapOn: 'Create (engine on, missing selector)'
+- scrollUntilVisible:
+    id: 'engine-status'
+    direction: UP
+- assertVisible:
+    id: 'engine-status'
+- assertVisible:
+    text: 'invalid:rejected=.*projectionSelector.*'

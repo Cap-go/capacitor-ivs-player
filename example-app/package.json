@@ -19,7 +19,8 @@
     "@capgo/capacitor-ivs-player": "file:..",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/android": "^8.5.2",
-    "@capgo/capacitor-updater": "^8.45.11"
+    "@capgo/capacitor-updater": "^8.45.11",
+    "@webview-native-ui/engine": "1.0.11"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",

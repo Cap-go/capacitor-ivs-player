@@ -52,12 +52,15 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.images.WebImage;
+import io.github.webview_native_ui.engine.NativeUIProjection;
+import java.util.Arrays;
+import java.util.Collections;
 import org.json.JSONArray;
 
 @CapacitorPlugin(name = "CapacitorIvsPlayer")
 public class CapacitorIvsPlayerPlugin extends Plugin {
 
-    public final String pluginVersion = "7.0.12";
+    public final String pluginVersion = "8.0.48";
 
     private final int mainPiPFrameLayoutId = 257;
     private PlayerView playerView;
@@ -92,6 +95,72 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     public String title = "";
     public String description = "";
     public String cover = "";
+    private NativeUIProjection projection;
+    private boolean nativeUiEngineEnabled = false;
+    private boolean nativeUiEngineChannelInstalled = false;
+
+    private void teardownNativeUiEngine() {
+        if (projection != null) {
+            projection.close();
+            projection = null;
+        }
+        nativeUiEngineEnabled = false;
+    }
+
+    private boolean setupNativeUiEngine(String projectionSelector) {
+        if (projection != null) {
+            projection.close();
+            projection = null;
+            nativeUiEngineEnabled = false;
+        }
+        try {
+            NativeUIProjection nextProjection = new NativeUIProjection(
+                getActivity().getWindow(),
+                bridge.getWebView(),
+                getPluginHandle().getId(),
+                projectionSelector,
+                new NativeUIProjection.ReceiveListeners(
+                    Arrays.asList("playerProjectionUpdated"),
+                    new NativeUIProjection.ReceiveListeners.Projection(
+                        Arrays.asList("playerProjectionShown"),
+                        Collections.emptyList(),
+                        Arrays.asList("playerProjectionHidden")
+                    ),
+                    Collections.emptyMap()
+                ),
+                () -> playerView
+            );
+            projection = nextProjection;
+            nativeUiEngineEnabled = true;
+            return true;
+        } catch (Exception error) {
+            projection = null;
+            nativeUiEngineEnabled = false;
+            Log.w("CapacitorIvsPlayer", "Native UI projection unavailable", error);
+            return false;
+        }
+    }
+
+    private void notifyPlayerProjectionUpdated() {
+        if (!nativeUiEngineEnabled) {
+            return;
+        }
+        notifyListeners("playerProjectionUpdated", new JSObject());
+    }
+
+    @Override
+    public void notifyListeners(String eventName, JSObject data, boolean retainUntilConsumed) {
+        if (nativeUiEngineEnabled && projection != null) {
+            projection.receive(eventName, data);
+        }
+        super.notifyListeners(eventName, data, retainUntilConsumed);
+    }
+
+    @Override
+    public void handleOnDestroy() {
+        teardownNativeUiEngine();
+        super.handleOnDestroy();
+    }
 
     @Override
     public void handleOnStop() {
@@ -452,22 +521,45 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         String url = call.getString("url", "");
         if (url == null) {
             call.reject("url is required");
+            return;
         }
-        var prevUrl = lastUrl;
-        lastUrl = url;
-        autoPlay = call.getBoolean("autoPlay", false);
-        Boolean toBack = call.getBoolean("toBack", false);
-        this.title = call.getString("title", "");
-        this.description = call.getString("description", "");
-        this.cover = call.getString("cover", "");
+        boolean enableEngine = call.getBoolean("nativeUiEngine", false);
+        String projectionSelector = call.getString("projectionSelector");
+        if (enableEngine && (projectionSelector == null || projectionSelector.isEmpty())) {
+            call.reject("projectionSelector is required when nativeUiEngine is true");
+            return;
+        }
+        final String nextUrl = url;
+        final boolean nextAutoPlay = call.getBoolean("autoPlay", false);
+        final Boolean nextToBack = call.getBoolean("toBack", false);
+        final String nextTitle = call.getString("title", "");
+        final String nextDescription = call.getString("description", "");
+        final String nextCover = call.getString("cover", "");
         getActivity().runOnUiThread(
             new Runnable() {
                 @Override
                 public void run() {
-                    cyclePlayer(prevUrl, url);
+                    if (!enableEngine) {
+                        teardownNativeUiEngine();
+                    } else if (!setupNativeUiEngine(projectionSelector)) {
+                        call.reject("Native UI projection unavailable");
+                        return;
+                    }
+                    final String prevUrl = lastUrl;
+                    lastUrl = nextUrl;
+                    autoPlay = nextAutoPlay;
+                    toBack = nextToBack;
+                    title = nextTitle;
+                    description = nextDescription;
+                    cover = nextCover;
+                    cyclePlayer(prevUrl, nextUrl);
                     _setFrame(x, y, width, height);
+                    notifyPlayerProjectionUpdated();
                     playerView.setClipToOutline(false);
-                    _setPlayerPosition(toBack);
+                    _setPlayerPosition(nextToBack);
+                    if (nativeUiEngineEnabled) {
+                        notifyListeners("playerProjectionShown", new JSObject());
+                    }
                     setPip(call);
                 }
             }
@@ -571,6 +663,15 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     @Override
     public void load() {
         super.load();
+        boolean configNativeUiEngine = getConfig().getBoolean("nativeUiEngine", false);
+        if (configNativeUiEngine && !nativeUiEngineChannelInstalled) {
+            try {
+                NativeUIProjection.Companion.install(bridge.getWebView());
+                nativeUiEngineChannelInstalled = true;
+            } catch (Exception error) {
+                Log.w("CapacitorIvsPlayer", "Native UI engine channel install skipped", error);
+            }
+        }
         getDisplaySize();
         setupCastListener();
         mediaRouteButton = new MediaRouteButton(bridge.getActivity());
@@ -661,6 +762,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                             playerViewParams.leftMargin = newMarginX;
                             playerViewParams.topMargin = newMarginY;
                             playerView.setLayoutParams(playerViewParams);
+                            notifyPlayerProjectionUpdated();
                             break;
                     }
                     return true;
@@ -687,6 +789,10 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     public void delete(PluginCall call) {
         FrameLayout mainPiPFrameLayout = getBridge().getActivity().findViewById(mainPiPFrameLayoutId);
         playerView.getPlayer().pause();
+        if (nativeUiEngineEnabled) {
+            notifyListeners("playerProjectionHidden", new JSObject());
+        }
+        teardownNativeUiEngine();
         if (mainPiPFrameLayout != null) {
             // remove playerView from mainPiPFrameLayout
             getActivity().runOnUiThread(
@@ -1028,6 +1134,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                     var width = (int) convertDpToPixel(call.getFloat("width", convertPixelsToDp(size.x)));
                     var height = (int) convertDpToPixel(call.getFloat("height", convertPixelsToDp(calcHeight(size.x))));
                     _setFrame(x, y, width, height);
+                    notifyPlayerProjectionUpdated();
                     call.resolve();
                 }
             }
