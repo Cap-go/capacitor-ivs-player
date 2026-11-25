@@ -535,7 +535,6 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
         final String nextTitle = call.getString("title", "");
         final String nextDescription = call.getString("description", "");
         final String nextCover = call.getString("cover", "");
-        final String prevUrl = lastUrl;
         getActivity().runOnUiThread(
             new Runnable() {
                 @Override
@@ -546,6 +545,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                         call.reject("Native UI projection unavailable");
                         return;
                     }
+                    final String prevUrl = lastUrl;
                     lastUrl = nextUrl;
                     autoPlay = nextAutoPlay;
                     toBack = nextToBack;
