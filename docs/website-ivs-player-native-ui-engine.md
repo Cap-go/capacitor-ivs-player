@@ -17,6 +17,9 @@ For Ionic modals and overlays, call `enableSupportIonicOverlays()` from `@webvie
 
 ```ts
 import { CapacitorIvsPlayer, pause, resume } from '@capgo/capacitor-ivs-player';
+import { enableSupportIonicOverlays } from '@webview-native-ui/engine/ionic';
+
+enableSupportIonicOverlays();
 
 await CapacitorIvsPlayer.create({
   url,

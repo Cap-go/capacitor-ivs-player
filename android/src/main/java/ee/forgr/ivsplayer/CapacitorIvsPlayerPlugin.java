@@ -529,13 +529,13 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
             call.reject("projectionSelector is required when nativeUiEngine is true");
             return;
         }
-        var prevUrl = lastUrl;
-        lastUrl = url;
-        autoPlay = call.getBoolean("autoPlay", false);
-        Boolean toBack = call.getBoolean("toBack", false);
-        this.title = call.getString("title", "");
-        this.description = call.getString("description", "");
-        this.cover = call.getString("cover", "");
+        final String nextUrl = url;
+        final boolean nextAutoPlay = call.getBoolean("autoPlay", false);
+        final Boolean nextToBack = call.getBoolean("toBack", false);
+        final String nextTitle = call.getString("title", "");
+        final String nextDescription = call.getString("description", "");
+        final String nextCover = call.getString("cover", "");
+        final String prevUrl = lastUrl;
         getActivity().runOnUiThread(
             new Runnable() {
                 @Override
@@ -546,11 +546,17 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                         call.reject("Native UI projection unavailable");
                         return;
                     }
-                    cyclePlayer(prevUrl, url);
+                    lastUrl = nextUrl;
+                    autoPlay = nextAutoPlay;
+                    toBack = nextToBack;
+                    title = nextTitle;
+                    description = nextDescription;
+                    cover = nextCover;
+                    cyclePlayer(prevUrl, nextUrl);
                     _setFrame(x, y, width, height);
                     notifyPlayerProjectionUpdated();
                     playerView.setClipToOutline(false);
-                    _setPlayerPosition(toBack);
+                    _setPlayerPosition(nextToBack);
                     if (nativeUiEngineEnabled) {
                         notifyListeners("playerProjectionShown", new JSObject());
                     }
