@@ -143,9 +143,10 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     }
 
     private func setupNativeUiEngine(projectionSelector: String) -> Bool {
-        teardownNativeUiEngine()
+        let previousProjection = projection
+        let wasEnabled = nativeUiEngineEnabled
         do {
-            projection = try NativeUIProjection(
+            let nextProjection = try NativeUIProjection(
                 webView: bridge?.webView,
                 plugin: jsName,
                 projectionSelector: projectionSelector,
@@ -159,9 +160,13 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
                 ),
                 view: { [weak self] in self?.playerView }
             )
+            previousProjection?.destroy()
+            projection = nextProjection
             nativeUiEngineEnabled = true
             return true
         } catch {
+            projection = previousProjection
+            nativeUiEngineEnabled = wasEnabled
             CAPLog.print("CapacitorIVSPlayer Native UI projection unavailable: \(error)")
             return false
         }
@@ -815,7 +820,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
                 self.notifyListeners("playerProjectionHidden", data: [:])
             }
             self.teardownNativeUiEngine()
+            call.resolve()
         }
-        call.resolve()
     }
 }

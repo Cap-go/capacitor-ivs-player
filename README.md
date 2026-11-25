@@ -40,16 +40,20 @@ import { CapacitorIvsPlayer, pause, resume } from '@capgo/capacitor-ivs-player';
 await CapacitorIvsPlayer.create({
   url: streamUrl,
   toBack: true,
+  autoPlay: true,
   nativeUiEngine: true,
   projectionSelector: '#ivs-player-slot',
 });
 
-pause();
-await showSettingsSheet();
-resume();
+try {
+  pause();
+  await showSettingsSheet();
+} finally {
+  resume();
+}
 ```
 
-CocoaPods apps also need the engine pod in `ios/App/Podfile` (see [Engine Capacitor guide](https://github.com/webview-native-ui/engine/blob/main/docs/getting-started/capacitor.md)).
+`CapgoIvsPlayer.podspec` pulls `WebViewNativeUIEngine` from the CocoaPods trunk (no extra Podfile entry when you use `cap sync ios`). SPM apps resolve it from `Package.swift`. See the [Engine Capacitor guide](https://github.com/webview-native-ui/engine/blob/main/docs/getting-started/capacitor.md/).
 
 ## Key features
 
@@ -701,23 +705,21 @@ Remove all listeners for this plugin.
 ### Interfaces
 
 
-#### CapacitorIvsPlayerCreateOptions
+#### CapacitorIvsPlayerCreateOptionsBase
 
-| Prop                     | Type                 | Description                                                                                                                                                                                                                                                                                                               | Default            | Since  |
-| ------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------ |
-| **`url`**                | <code>string</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`pip`**                | <code>boolean</code> |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`title`**              | <code>string</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`subtitle`**           | <code>string</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`cover`**              | <code>string</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`autoPlay`**           | <code>boolean</code> |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`toBack`**             | <code>boolean</code> |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`x`**                  | <code>number</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`y`**                  | <code>number</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`width`**              | <code>number</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`height`**             | <code>number</code>  |                                                                                                                                                                                                                                                                                                                           |                    |        |
-| **`nativeUiEngine`**     | <code>boolean</code> | Connect the native IVS player to a DOM slot via `@webview-native-ui/engine` so web UI can cover it or keep it aligned with scrolling layout. While a web overlay covers the player, live video does not continue in the Web layer: the Engine shows a frozen snapshot until you call `resume()` from this package.        | <code>false</code> | 8.0.48 |
-| **`projectionSelector`** | <code>string</code>  | CSS selector for the DOM container that receives the player Web projection when {@link <a href="#capacitorivsplayercreateoptions">CapacitorIvsPlayerCreateOptions.nativeUiEngine</a> `nativeUiEngine`} is true. Required when the flag is true. Must match one element in the document (not inside a closed shadow root). |                    | 8.0.48 |
+| Prop           | Type                 |
+| -------------- | -------------------- |
+| **`url`**      | <code>string</code>  |
+| **`pip`**      | <code>boolean</code> |
+| **`title`**    | <code>string</code>  |
+| **`subtitle`** | <code>string</code>  |
+| **`cover`**    | <code>string</code>  |
+| **`autoPlay`** | <code>boolean</code> |
+| **`toBack`**   | <code>boolean</code> |
+| **`x`**        | <code>number</code>  |
+| **`y`**        | <code>number</code>  |
+| **`width`**    | <code>number</code>  |
+| **`height`**   | <code>number</code>  |
 
 
 #### CapacitorFrame
@@ -738,6 +740,11 @@ Remove all listeners for this plugin.
 
 
 ### Type Aliases
+
+
+#### CapacitorIvsPlayerCreateOptions
+
+<code>(<a href="#capacitorivsplayercreateoptionsbase">CapacitorIvsPlayerCreateOptionsBase</a> & { /** * @default false * @since 8.0.48 */ nativeUiEngine?: false; /** * @since 8.0.48 */ projectionSelector?: string; }) | (<a href="#capacitorivsplayercreateoptionsbase">CapacitorIvsPlayerCreateOptionsBase</a> & { /** * Connect the native IVS player to a DOM slot via `@webview-native-ui/engine` so web UI can cover it * or keep it aligned with scrolling layout. While a web overlay covers the player, live video does not * continue in the Web layer: the Engine shows a frozen snapshot until you call `resume()` from this package. * * @since 8.0.48 */ nativeUiEngine: true; /** * CSS selector for the DOM container that receives the player Web projection. * Must match one element in the document (not inside a closed shadow root). * * @since 8.0.48 */ projectionSelector: string; })</code>
 
 
 #### CapacitorIvsPlayerState

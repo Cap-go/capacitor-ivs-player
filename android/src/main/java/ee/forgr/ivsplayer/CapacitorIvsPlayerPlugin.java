@@ -108,13 +108,10 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     }
 
     private boolean setupNativeUiEngine(String projectionSelector) {
-        teardownNativeUiEngine();
-        if (!nativeUiEngineChannelInstalled) {
-            NativeUIProjection.Companion.install(bridge.getWebView());
-            nativeUiEngineChannelInstalled = true;
-        }
+        NativeUIProjection previousProjection = projection;
+        boolean wasEnabled = nativeUiEngineEnabled;
         try {
-            projection = new NativeUIProjection(
+            NativeUIProjection nextProjection = new NativeUIProjection(
                 getActivity().getWindow(),
                 bridge.getWebView(),
                 getPluginHandle().getId(),
@@ -130,9 +127,15 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                 ),
                 () -> playerView
             );
+            if (previousProjection != null) {
+                previousProjection.close();
+            }
+            projection = nextProjection;
             nativeUiEngineEnabled = true;
             return true;
         } catch (Exception error) {
+            projection = previousProjection;
+            nativeUiEngineEnabled = wasEnabled;
             Log.w("CapacitorIvsPlayer", "Native UI projection unavailable", error);
             return false;
         }
@@ -656,6 +659,14 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     @Override
     public void load() {
         super.load();
+        if (!nativeUiEngineChannelInstalled) {
+            try {
+                NativeUIProjection.Companion.install(bridge.getWebView());
+                nativeUiEngineChannelInstalled = true;
+            } catch (Exception error) {
+                Log.w("CapacitorIvsPlayer", "Native UI engine channel install skipped", error);
+            }
+        }
         getDisplaySize();
         setupCastListener();
         mediaRouteButton = new MediaRouteButton(bridge.getActivity());
@@ -746,6 +757,7 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                             playerViewParams.leftMargin = newMarginX;
                             playerViewParams.topMargin = newMarginY;
                             playerView.setLayoutParams(playerViewParams);
+                            notifyPlayerProjectionUpdated();
                             break;
                     }
                     return true;

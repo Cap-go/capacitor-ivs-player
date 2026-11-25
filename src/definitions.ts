@@ -10,7 +10,7 @@ export interface PluginListenerHandle {
 export type CapacitorIvsPlayerState = 'IDLE' | 'BUFFERING' | 'READY' | 'PLAYING' | 'ENDED' | 'UNKNOWN';
 export type CapacitorIvsPlayerBackgroundState = 'PAUSED' | 'PLAYING';
 
-export interface CapacitorIvsPlayerCreateOptions {
+interface CapacitorIvsPlayerCreateOptionsBase {
   url: string;
   pip?: boolean;
   title?: string;
@@ -22,24 +22,37 @@ export interface CapacitorIvsPlayerCreateOptions {
   y?: number;
   width?: number;
   height?: number;
-  /**
-   * Connect the native IVS player to a DOM slot via `@webview-native-ui/engine` so web UI can cover it
-   * or keep it aligned with scrolling layout. While a web overlay covers the player, live video does not
-   * continue in the Web layer: the Engine shows a frozen snapshot until you call `resume()` from this package.
-   *
-   * @default false
-   * @since 8.0.48
-   */
-  nativeUiEngine?: boolean;
-  /**
-   * CSS selector for the DOM container that receives the player Web projection when
-   * {@link CapacitorIvsPlayerCreateOptions.nativeUiEngine `nativeUiEngine`} is true. Required when the flag is true.
-   * Must match one element in the document (not inside a closed shadow root).
-   *
-   * @since 8.0.48
-   */
-  projectionSelector?: string;
 }
+
+export type CapacitorIvsPlayerCreateOptions =
+  | (CapacitorIvsPlayerCreateOptionsBase & {
+      /**
+       * @default false
+       * @since 8.0.48
+       */
+      nativeUiEngine?: false;
+      /**
+       * @since 8.0.48
+       */
+      projectionSelector?: string;
+    })
+  | (CapacitorIvsPlayerCreateOptionsBase & {
+      /**
+       * Connect the native IVS player to a DOM slot via `@webview-native-ui/engine` so web UI can cover it
+       * or keep it aligned with scrolling layout. While a web overlay covers the player, live video does not
+       * continue in the Web layer: the Engine shows a frozen snapshot until you call `resume()` from this package.
+       *
+       * @since 8.0.48
+       */
+      nativeUiEngine: true;
+      /**
+       * CSS selector for the DOM container that receives the player Web projection.
+       * Must match one element in the document (not inside a closed shadow root).
+       *
+       * @since 8.0.48
+       */
+      projectionSelector: string;
+    });
 
 export interface CapacitorIvsPlayerPlugin {
   create(options: CapacitorIvsPlayerCreateOptions): Promise<void>;

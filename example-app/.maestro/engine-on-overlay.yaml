@@ -6,7 +6,7 @@ appId: com.example.plugin
     text: 'engine-on:state='
 - tapOn: 'Toggle web overlay'
 - assertVisible:
-    id: 'engine-web-overlay'
+    id: 'engine-demo-overlay'
 - assertVisible:
     text: 'overlay-open:state='
 - tapOn: 'Web overlay (tap to dismiss)'
