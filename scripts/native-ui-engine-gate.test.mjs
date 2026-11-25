@@ -27,10 +27,19 @@ test('projection setup stays behind nativeUiEngine flag in create() (iOS)', () =
   );
 });
 
-test('Android engine channel is installed from load()', () => {
+test('Android engine channel install is gated on capacitor.config nativeUiEngine', () => {
+  assert.match(java, /boolean configNativeUiEngine = getConfig\(\)\.getBoolean\("nativeUiEngine", false\)/);
   assert.match(
     java,
-    /public void load\(\) \{[\s\S]*NativeUIProjection\.Companion\.install\(bridge\.getWebView\(\)\)/,
+    /if \(configNativeUiEngine && !nativeUiEngineChannelInstalled\) \{[\s\S]*NativeUIProjection\.Companion\.install\(bridge\.getWebView\(\)\)/,
+  );
+});
+
+test('iOS attaches playerView before Native UI projection setup', () => {
+  assert.match(swift, /ensurePlayerViewAttachedForNativeUi\(toBack: self\.toBack\)/);
+  assert.match(
+    swift,
+    /_ = self\.ensurePlayerViewAttachedForNativeUi\(toBack: self\.toBack\)[\s\S]*if !self\.setupNativeUiEngine\(projectionSelector: selector\)/,
   );
 });
 

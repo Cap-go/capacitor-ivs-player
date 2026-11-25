@@ -663,7 +663,8 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     @Override
     public void load() {
         super.load();
-        if (!nativeUiEngineChannelInstalled) {
+        boolean configNativeUiEngine = getConfig().getBoolean("nativeUiEngine", false);
+        if (configNativeUiEngine && !nativeUiEngineChannelInstalled) {
             try {
                 NativeUIProjection.Companion.install(bridge.getWebView());
                 nativeUiEngineChannelInstalled = true;

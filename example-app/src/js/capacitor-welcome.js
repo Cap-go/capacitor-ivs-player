@@ -15,11 +15,59 @@ function setEngineStatus(text) {
   }
 }
 
-async function reportPluginState(label) {
-  try {
+function setPlayerSlotBackground(engineOn) {
+  const slot = document.getElementById('ivs-player-slot');
+  if (!slot) {
+    return;
+  }
+  slot.style.background = engineOn ? 'transparent' : '#111';
+}
+
+function slotHasNativeProjection() {
+  const slot = document.getElementById('ivs-player-slot');
+  return Boolean(slot?.getAttribute('data-native-ui-destination'));
+}
+
+async function waitForPlayingState(timeoutMs = 90000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
     const state = await CapacitorIvsPlayer.getState();
-    setEngineStatus(`${label}:state=${state.state}`);
-    return state;
+    if (state.state === 'PLAYING') {
+      return state;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400));
+  }
+  throw new Error(`Timed out waiting for PLAYING (last=${(await CapacitorIvsPlayer.getState()).state})`);
+}
+
+async function waitForSlotProjection(timeoutMs = 30000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (slotHasNativeProjection()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error('Timed out waiting for native UI projection on #ivs-player-slot');
+}
+
+async function reportPluginState(label) {
+  const state = await CapacitorIvsPlayer.getState();
+  setEngineStatus(`${label}:state=${state.state}`);
+  return state;
+}
+
+async function reportPlayingState(label, options = {}) {
+  const { requireProjection = false } = options;
+  try {
+    await waitForPlayingState();
+    if (requireProjection) {
+      await waitForSlotProjection();
+      setEngineStatus(`${label}:state=PLAYING;projection=visible`);
+    } else {
+      setEngineStatus(`${label}:state=PLAYING`);
+    }
+    return await CapacitorIvsPlayer.getState();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     setEngineStatus(`${label}:error=${message}`);
@@ -192,10 +240,12 @@ window.customElements.define(
         await reportPluginState('create-off');
       });
       self.shadowRoot.querySelector('#create-engine-off').addEventListener('click', async function () {
-        await CapacitorIvsPlayer.create({ url: SAMPLE_STREAM_URL, autoPlay: false, toBack: true, nativeUiEngine: false });
-        await reportPluginState('engine-off');
+        setPlayerSlotBackground(false);
+        await CapacitorIvsPlayer.create({ url: SAMPLE_STREAM_URL, autoPlay: true, toBack: true, nativeUiEngine: false });
+        await reportPlayingState('engine-off');
       });
       self.shadowRoot.querySelector('#create-engine-on').addEventListener('click', async function () {
+        setPlayerSlotBackground(true);
         await CapacitorIvsPlayer.create({
           url: SAMPLE_STREAM_URL,
           autoPlay: true,
@@ -203,7 +253,7 @@ window.customElements.define(
           nativeUiEngine: true,
           projectionSelector: '#ivs-player-slot',
         });
-        await reportPluginState('engine-on');
+        await reportPlayingState('engine-on', { requireProjection: true });
       });
       self.shadowRoot.querySelector('#create-engine-invalid').addEventListener('click', async function () {
         try {
@@ -224,7 +274,7 @@ window.customElements.define(
         if (existing) {
           existing.remove();
           resume();
-          await reportPluginState('overlay-dismissed');
+          await reportPlayingState('overlay-dismissed', { requireProjection: true });
           return;
         }
         pause();
@@ -237,10 +287,10 @@ window.customElements.define(
         overlay.addEventListener('click', async () => {
           overlay.remove();
           resume();
-          await reportPluginState('overlay-dismissed');
+          await reportPlayingState('overlay-dismissed', { requireProjection: true });
         });
         document.body.appendChild(overlay);
-        await reportPluginState('overlay-open');
+        await reportPlayingState('overlay-open', { requireProjection: true });
       });
       self.shadowRoot.querySelector('#delete-stream').addEventListener('click', async function (e) {
         CapacitorIvsPlayer.delete();

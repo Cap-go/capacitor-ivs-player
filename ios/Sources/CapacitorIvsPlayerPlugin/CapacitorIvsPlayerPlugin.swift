@@ -35,9 +35,8 @@ class CapacitorIVSPlayer: NSObject, IVSPlayer.Delegate {
             !capacitorPlugin.isCastActive {
             capacitorPlugin.player.play()
         }
-        // when playing add to view
         if state == .playing {
-            capacitorPlugin.bridge?.viewController?.view.addSubview(capacitorPlugin.playerView)
+            capacitorPlugin.handlePlayerReachedPlayingState()
         }
         capacitorPlugin.notifyListeners("onState", data: ["state": stateName])
     }
@@ -177,6 +176,49 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             return
         }
         notifyListeners("playerProjectionUpdated", data: [:])
+    }
+
+    private func ensurePlayerViewAttachedForNativeUi(toBack: Bool) -> Bool {
+        guard let viewController = bridge?.viewController else {
+            return false
+        }
+        let container = viewController.view!
+        playerView.isHidden = false
+        playerView.alpha = 1
+
+        guard let webView else {
+            if playerView.superview == nil {
+                container.addSubview(playerView)
+            }
+            return true
+        }
+
+        if playerView.superview == nil {
+            if toBack {
+                container.insertSubview(playerView, belowSubview: webView)
+            } else {
+                container.addSubview(playerView)
+                container.bringSubviewToFront(playerView)
+            }
+        } else if toBack {
+            container.insertSubview(playerView, belowSubview: webView)
+        } else {
+            container.bringSubviewToFront(playerView)
+        }
+        return true
+    }
+
+    func handlePlayerReachedPlayingState() {
+        DispatchQueue.main.async {
+            if self.nativeUiEngineEnabled {
+                _ = self.ensurePlayerViewAttachedForNativeUi(toBack: self.toBack)
+                self.notifyPlayerProjectionUpdated()
+            } else if let container = self.bridge?.viewController?.view {
+                if self.playerView.superview == nil {
+                    container.addSubview(self.playerView)
+                }
+            }
+        }
     }
 
     public override func notifyListeners(_ eventName: String, data: [String: Any]?, retainUntilConsumed: Bool = false) {
@@ -569,17 +611,22 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
 
     @objc func internalSetPlayerPosition(toBack: Bool) -> Bool {
         self.toBack = toBack
+        guard let viewController = self.bridge?.viewController else {
+            return false
+        }
+        let container = viewController.view!
         if toBack {
             self.webView?.backgroundColor = UIColor.clear
             self.webView?.isOpaque = false
             self.webView?.scrollView.backgroundColor = UIColor.clear
             self.webView?.scrollView.isOpaque = false
-        } else {
-            guard let viewController = self.bridge?.viewController else {
-                return false
+            if let webView = self.webView, playerView.superview === container {
+                container.insertSubview(playerView, belowSubview: webView)
             }
-            viewController.view.bringSubviewToFront(self.playerView)
+        } else {
+            container.bringSubviewToFront(self.playerView)
         }
+        notifyPlayerProjectionUpdated()
         print("CapacitorIVSPlayer _setPlayerPosition done")
         return true
     }
@@ -642,7 +689,9 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             // add again after 30 ms
             self.player.pause()
             self.player.load(nil)
-            self.playerView.removeFromSuperview()
+            if !nativeUiEngineEnabled {
+                self.playerView.removeFromSuperview()
+            }
         }
         self.loadUrl(url: nextUrl)
         return true
@@ -699,6 +748,7 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             if !enableEngine {
                 self.teardownNativeUiEngine()
             } else if let selector, !selector.isEmpty {
+                _ = self.ensurePlayerViewAttachedForNativeUi(toBack: self.toBack)
                 if !self.setupNativeUiEngine(projectionSelector: selector) {
                     call.reject("Native UI projection unavailable")
                     return
@@ -711,12 +761,16 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
             self.setupRemoteTransportControls()
             let setupDone = self.cyclePlayer(prevUrl: self.player.path?.absoluteString ?? "", nextUrl: url)
             print("CapacitorIVSPlayer setupDone \(setupDone)")
+            if self.nativeUiEngineEnabled {
+                _ = self.ensurePlayerViewAttachedForNativeUi(toBack: self.toBack)
+            }
             self.internalSetPip(call)
             let frameDone = self.internalSetFrame(call)
             let playerPositionDone = self.internalSetPlayerPosition(toBack: self.toBack)
             if setupDone && frameDone && playerPositionDone {
                 self.isClosed = false
                 if self.nativeUiEngineEnabled {
+                    self.notifyPlayerProjectionUpdated()
                     self.notifyListeners("playerProjectionShown", data: [:])
                 }
                 print("CapacitorIVSPlayer success create")

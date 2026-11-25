@@ -53,7 +53,7 @@ try {
 }
 ```
 
-`CapgoIvsPlayer.podspec` pulls `WebViewNativeUIEngine` from the CocoaPods trunk (no extra Podfile entry when you use `cap sync ios`). SPM apps resolve it from `Package.swift`. See the [Engine Capacitor guide](https://github.com/webview-native-ui/engine/blob/main/docs/getting-started/capacitor.md/).
+When you use `nativeUiEngine: true`, install `@webview-native-ui/engine@1.0.11` in your app and add the native dependency yourself. CocoaPods apps: add `pod 'WebViewNativeUIEngine', :path => '../../node_modules/@webview-native-ui/engine'` to `ios/App/Podfile` (adjust the relative path to your `node_modules` layout). Apps that never pass `nativeUiEngine: true` on `create()` do not need that Podfile line. On Android, set `plugins.CapacitorIvsPlayer.nativeUiEngine` to `true` in `capacitor.config` so the plugin installs the Engine bridge during `load()`; leave it unset or `false` for the legacy default. See the [Engine Capacitor guide](https://github.com/webview-native-ui/engine/blob/main/docs/getting-started/capacitor.md/).
 
 ## Key features
 
