@@ -3,12 +3,12 @@ appId: com.example.plugin
 - launchApp
 - tapOn: 'Create (engine on)'
 - assertVisible:
-    text: 'engine-on:state='
+    text: '.*engine-on:state=.*'
 - tapOn: 'Toggle web overlay'
 - assertVisible:
     id: 'engine-demo-overlay'
 - assertVisible:
-    text: 'overlay-open:state='
+    text: '.*overlay-open:state=.*'
 - tapOn: 'Web overlay (tap to dismiss)'
 - assertVisible:
-    text: 'overlay-dismissed:state='
+    text: '.*overlay-dismissed:state=.*'

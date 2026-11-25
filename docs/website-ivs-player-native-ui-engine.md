@@ -13,6 +13,8 @@ Add under https://capgo.app/docs/plugins/ivs-player/
 
 Live IVS playback does not continue inside the Web projection. When web UI covers the player (via `pause()` or Ionic overlays), the Engine shows a **snapshot** of the native frame in `projectionSelector`. Playback looks frozen until `resume()` restores the native view.
 
+For Ionic modals and overlays, call `enableSupportIonicOverlays()` from `@webview-native-ui/engine/ionic` during app bootstrap (once per WebView).
+
 ```ts
 import { CapacitorIvsPlayer, pause, resume } from '@capgo/capacitor-ivs-player';
 

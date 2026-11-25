@@ -19,11 +19,11 @@ test('notifyListeners forwards to projection only when nativeUiEngine is enabled
 test('projection setup stays behind nativeUiEngine flag in create() (iOS)', () => {
   assert.match(
     swift,
-    /let enableEngine = call\.getBool\("nativeUiEngine", false\)[\s\S]*if !enableEngine \{[\s\S]*teardownNativeUiEngine\(\)/,
+    /DispatchQueue\.main\.async \{[\s\S]*if !enableEngine \{[\s\S]*teardownNativeUiEngine\(\)/,
   );
   assert.match(
     swift,
-    /if !setupNativeUiEngine\(projectionSelector: selector\) \{[\s\S]*call\.reject\("Native UI projection unavailable"\)/,
+    /if !self\.setupNativeUiEngine\(projectionSelector: selector\) \{[\s\S]*call\.reject\("Native UI projection unavailable"\)/,
   );
 });
 
@@ -37,7 +37,7 @@ test('Android engine channel is installed from load()', () => {
 test('Android projection setup stays behind nativeUiEngine flag in create()', () => {
   assert.match(
     java,
-    /boolean enableEngine = call\.getBoolean\("nativeUiEngine", false\);[\s\S]*if \(!enableEngine\) \{[\s\S]*teardownNativeUiEngine\(\)/,
+    /runOnUiThread\([\s\S]*if \(!enableEngine\) \{[\s\S]*teardownNativeUiEngine\(\)/,
   );
   assert.match(
     java,

@@ -143,8 +143,9 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
     }
 
     private func setupNativeUiEngine(projectionSelector: String) -> Bool {
-        let previousProjection = projection
-        let wasEnabled = nativeUiEngineEnabled
+        projection?.destroy()
+        projection = nil
+        nativeUiEngineEnabled = false
         do {
             let nextProjection = try NativeUIProjection(
                 webView: bridge?.webView,
@@ -160,13 +161,12 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
                 ),
                 view: { [weak self] in self?.playerView }
             )
-            previousProjection?.destroy()
             projection = nextProjection
             nativeUiEngineEnabled = true
             return true
         } catch {
-            projection = previousProjection
-            nativeUiEngineEnabled = wasEnabled
+            projection = nil
+            nativeUiEngineEnabled = false
             CAPLog.print("CapacitorIVSPlayer Native UI projection unavailable: \(error)")
             return false
         }
@@ -690,18 +690,20 @@ public class CapacitorIvsPlayerPlugin: CAPPlugin, AVPictureInPictureControllerDe
         autoPlay = call.getBool("autoPlay", false)
         toBack = call.getBool("toBack", false)
         let enableEngine = call.getBool("nativeUiEngine", false)
-        if !enableEngine {
-            teardownNativeUiEngine()
-        } else if let selector = call.getString("projectionSelector"), !selector.isEmpty {
-            if !setupNativeUiEngine(projectionSelector: selector) {
-                call.reject("Native UI projection unavailable")
-                return
-            }
-        } else {
+        let selector = call.getString("projectionSelector")
+        if enableEngine && (selector == nil || selector?.isEmpty == true) {
             call.reject("projectionSelector is required when nativeUiEngine is true")
             return
         }
         DispatchQueue.main.async {
+            if !enableEngine {
+                self.teardownNativeUiEngine()
+            } else if let selector, !selector.isEmpty {
+                if !self.setupNativeUiEngine(projectionSelector: selector) {
+                    call.reject("Native UI projection unavailable")
+                    return
+                }
+            }
             let title = call.getString("title", "")
             let subTitle = call.getString("subtitle", "")
             let cover = call.getString("cover", "")

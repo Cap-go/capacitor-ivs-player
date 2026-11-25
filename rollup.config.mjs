@@ -19,12 +19,13 @@ export default [
   },
   {
     input: "dist/esm/index.js",
+    plugins: [nodeResolve(), commonjs()],
     output: {
       file: "dist/plugin.cjs.js",
       format: "cjs",
       sourcemap: true,
       inlineDynamicImports: true,
     },
-    external: ["@capacitor/core", "@webview-native-ui/engine"],
+    external: ["@capacitor/core"],
   },
 ];

@@ -108,8 +108,11 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
     }
 
     private boolean setupNativeUiEngine(String projectionSelector) {
-        NativeUIProjection previousProjection = projection;
-        boolean wasEnabled = nativeUiEngineEnabled;
+        if (projection != null) {
+            projection.close();
+            projection = null;
+            nativeUiEngineEnabled = false;
+        }
         try {
             NativeUIProjection nextProjection = new NativeUIProjection(
                 getActivity().getWindow(),
@@ -127,15 +130,12 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
                 ),
                 () -> playerView
             );
-            if (previousProjection != null) {
-                previousProjection.close();
-            }
             projection = nextProjection;
             nativeUiEngineEnabled = true;
             return true;
         } catch (Exception error) {
-            projection = previousProjection;
-            nativeUiEngineEnabled = wasEnabled;
+            projection = null;
+            nativeUiEngineEnabled = false;
             Log.w("CapacitorIvsPlayer", "Native UI projection unavailable", error);
             return false;
         }
@@ -524,18 +524,10 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
             return;
         }
         boolean enableEngine = call.getBoolean("nativeUiEngine", false);
-        if (!enableEngine) {
-            teardownNativeUiEngine();
-        } else {
-            String projectionSelector = call.getString("projectionSelector");
-            if (projectionSelector == null || projectionSelector.isEmpty()) {
-                call.reject("projectionSelector is required when nativeUiEngine is true");
-                return;
-            }
-            if (!setupNativeUiEngine(projectionSelector)) {
-                call.reject("Native UI projection unavailable");
-                return;
-            }
+        String projectionSelector = call.getString("projectionSelector");
+        if (enableEngine && (projectionSelector == null || projectionSelector.isEmpty())) {
+            call.reject("projectionSelector is required when nativeUiEngine is true");
+            return;
         }
         var prevUrl = lastUrl;
         lastUrl = url;
@@ -548,6 +540,12 @@ public class CapacitorIvsPlayerPlugin extends Plugin {
             new Runnable() {
                 @Override
                 public void run() {
+                    if (!enableEngine) {
+                        teardownNativeUiEngine();
+                    } else if (!setupNativeUiEngine(projectionSelector)) {
+                        call.reject("Native UI projection unavailable");
+                        return;
+                    }
                     cyclePlayer(prevUrl, url);
                     _setFrame(x, y, width, height);
                     notifyPlayerProjectionUpdated();

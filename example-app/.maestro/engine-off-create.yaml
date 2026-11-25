@@ -5,4 +5,4 @@ appId: com.example.plugin
 - assertVisible:
     id: 'engine-status'
 - assertVisible:
-    text: 'engine-off:state='
+    text: '.*engine-off:state=.*'
