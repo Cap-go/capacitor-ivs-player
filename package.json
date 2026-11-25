@@ -50,7 +50,7 @@
     "watch": "tsc --watch",
     "prepublishOnly": "bun run build",
     "check:wiring": "node scripts/check-capacitor-plugin-wiring.mjs",
-    "test:engine": "node --test scripts/native-ui-engine-gate.test.mjs scripts/native-ui-engine-runtime.test.mjs",
+    "test:engine": "npm run build && node --test scripts/native-ui-engine-gate.test.mjs scripts/native-ui-engine-runtime.test.mjs",
     "check:cap9-deprecated": "node scripts/check-cap9-deprecated.mjs",
     "example:install": "cd example-app && bun install --frozen-lockfile",
     "example:build": "bun run build && cd example-app && bun install --frozen-lockfile && bun run build",
